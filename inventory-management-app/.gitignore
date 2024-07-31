@@ -2,8 +2,6 @@
 
 .env
 /.env
-/pantry-tracker/inventory-management-app/.env
-/inventory-management-app/.env
 
 # dependencies
 /node_modules
