@@ -7,7 +7,7 @@ import {firestore} from "@/firebase"
 
 import { Stack, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
-import { query, collection, getDocs, getDoc, deleteDoc } from "firebase/firestore";
+import { query, collection, getDocs, getDoc, deleteDoc, Modal } from "firebase/firestore";
 
 export default function None(){
     const [inventory, setInventory] = useState([])
@@ -38,7 +38,7 @@ export default function None(){
             if (quantity === 1){
                 await deleteDoc(docRef)
             } else{
-                await setDoc(docRef, {quantity: quantity = 1})
+                await setDoc(docRef, {quantity: quantity - 1})
             }
         }
         await updateInventory()
@@ -50,7 +50,6 @@ export default function None(){
         
         if (docSnap.exists()) {
             const {quantity} = docSnap.data()
-
             await setDoc(docRef, {quantity: quantity + 1})
         } else{
             await setDoc(docRef, {quantity: 1})
@@ -66,7 +65,11 @@ export default function None(){
     const handleClosed = () => setOpen(false)
 
     return (
-        <Box>
+        <Box width="100vw" height="100vh" display="flex" justifyContent="center" alignItems="center" gap={2}>
+
+            <Modal open={open} onClose={handleClose}>
+
+            </Modal>
             <Typography variant="h1">Inventory management</Typography>
             
         </Box>
