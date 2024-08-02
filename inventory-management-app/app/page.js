@@ -7,7 +7,7 @@ import {firestore} from "@/firebase"
 
 import { Stack, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
-import { query, collection, getDocs } from "firebase/firestore";
+import { query, collection, getDocs, getDoc, deleteDoc } from "firebase/firestore";
 
 export default function None(){
     const [inventory, setInventory] = useState([])
@@ -25,25 +25,50 @@ export default function None(){
             })
         })
         setInventory(inventoryList)
-        console.log(inventoryList)
+
+    }
+
+    const removeItem = async(item) => {
+        const docRef = doc(collection(firestore, "inventory"), item)
+        const docSnap = await getDoc(docRef)
+
+        if (docSnap.exists()){
+            const {quantity} = docSnap.data()
+
+            if (quantity === 1){
+                await deleteDoc(docRef)
+            } else{
+                await setDoc(docRef, {quantity: quantity = 1})
+            }
+        }
+        await updateInventory()
+    }
+
+    const addItem = async(item) => {
+        const docRef = doc(collection(firestore, "inventory"), item)
+        const docSnap = await getDoc(docRef)
+        
+        if (docSnap.exists()) {
+            const {quantity} = docSnap.data()
+
+            await setDoc(docRef, {quantity: quantity + 1})
+        } else{
+            await setDoc(docRef, {quantity: 1})
+        }
+        await updateInventory()
     }
 
     useEffect(() => {
         updateInventory()
     }, [])
 
+    const handleOpen = () => setOpen(true)
+    const handleClosed = () => setOpen(false)
+
     return (
         <Box>
             <Typography variant="h1">Inventory management</Typography>
-
-            {
-                inventory.forEach((item) => {
-                    return (<>
-                    {item.name}
-                    {item.count}
-                    </>)
-                })
-            }
+            
         </Box>
     )
 }
