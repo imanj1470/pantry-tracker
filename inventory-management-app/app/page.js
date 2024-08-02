@@ -7,7 +7,7 @@ import {firestore} from "@/firebase"
 
 import { Stack, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
-import { query } from "firebase/firestore";
+import { query, collection, getDocs } from "firebase/firestore";
 
 export default function None(){
     const [inventory, setInventory] = useState([])
