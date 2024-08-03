@@ -4,13 +4,12 @@
 import Image from "next/image"
 import {useState, useEffect} from "react"
 import {firestore} from "@/firebase"
-
-import { Button, Stack, Typography, Modal, TextField, Box } from '@mui/material';
 import { query, collection, getDocs, getDoc, deleteDoc } from "firebase/firestore";
+import { Button, Stack, Typography, Modal, TextField, Box } from '@mui/material';
 
 export default function None(){
     const [inventory, setInventory] = useState([])
-    const [open, setOpen] = useState([false])
+    const [open, setOpen] = useState(false)
     const [itemName, setItemName] = useState([""])
 
     const updateInventory = async () => {
@@ -64,7 +63,7 @@ export default function None(){
     const handleClosed = () => setOpen(false)
 
     return (
-        <Box width="100vw" height="100vh" display="flex" justifyContent="center" alignItems="center" gap={2}>
+        <Box width="100vw" height="100vh" display="flex" justifyContent="center" alignItems="center" gap={2} flexDirection="column">
 
             <Modal open={open} onClose={handleClosed}>
                 <Box 
@@ -110,6 +109,13 @@ export default function None(){
             }}>
                 Add new item
             </Button>
+            <Box border="1px solid #333">
+                <Box
+                    width="800px"
+                    height="100px"
+                    bgcolor="#ADD8E6">
+                    </Box>
+            </Box>
             
         {/* <Typography variant="h1">Inventory management</Typography> */}
 
