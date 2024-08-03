@@ -153,8 +153,11 @@ export default function None() {
 
 /* features to add
     search option
+    instead of the remove button, make it an option to append quantity - if quant = 0, then remove entry from db? have a save button so changes are only made to the db when save pressed
     when adding items, have a lil up and down arrow to set the quantity of what to add(append additem func to compensate for this by taking amount as a parameter)
-    make frontend nicer and proffesional - search tiktok for nice frontends and steal?
+    make frontend nicer and proffesional - search tiktok for nice frontends and use for inspo?
     deploy to vercel
     then include ai to scan items
+    do bonus tasks
+
 */
