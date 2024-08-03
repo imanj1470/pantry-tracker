@@ -149,3 +149,12 @@ export default function None() {
         </Box>
     )
 }
+
+
+/* features to add
+    search option
+    when adding items, have a lil up and down arrow to set the quantity of what to add(append additem func to compensate for this by taking amount as a parameter)
+    make frontend nicer and proffesional - search tiktok for nice frontends and steal?
+    deploy to vercel
+    then include ai to scan items
+*/
