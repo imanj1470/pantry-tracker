@@ -7,6 +7,10 @@ import {firestore} from "@/firebase"
 import { query, collection, getDocs, getDoc, deleteDoc } from "firebase/firestore";
 import { Button, Stack, Typography, Modal, TextField, Box } from '@mui/material';
 
+
+
+
+
 export default function None(){
     const [inventory, setInventory] = useState([])
     const [open, setOpen] = useState(false)
@@ -113,13 +117,37 @@ export default function None(){
                 <Box
                     width="800px"
                     height="100px"
-                    bgcolor="#ADD8E6">
-                    </Box>
+                    bgcolor="#ADD8E6"
+                    alignItems="center"
+                    justifyContent="center"
+                    display="flex"
+                    >
+                        <Typography variant="h2"
+                        color="#333">Inventory Items
+                        </Typography>
+                </Box>
             </Box>
-            
-        {/* <Typography variant="h1">Inventory management</Typography> */}
+            <Stack width="300px" height="300px" spacing={2} overflow="auto">
+                {
+                    inventory.map(({name, quantity}) => (
+                        <Box key={name} width="100%"
+                        minHeight="150px" display="flex"
+                        alignItems="center" justifyContent="space-between"
+                        backgroundColor="#f0f0f0" padding={5}>
+                            <Typography variant="h3" color="#333"
+                            textAlign="center">
+                                {name.charAt(0).toUpperCase() + name.slice(1)}
+                            </Typography>
+                            <Typography variant="h3" color="#333"
+                            textAlign="center">{quantity}</Typography>
 
-            
+                            <Button variant="contained" onClick={()=> {
+                                removeItem(name)
+                            }}>Remove</Button>
+                            
+                        </Box>
+                    ))}
+            </Stack>
         </Box>
     )
 }
