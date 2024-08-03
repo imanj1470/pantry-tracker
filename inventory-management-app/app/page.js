@@ -5,9 +5,8 @@ import Image from "next/image"
 import {useState, useEffect} from "react"
 import {firestore} from "@/firebase"
 
-import { Stack, Typography } from '@mui/material';
-import Box from '@mui/material/Box';
-import { query, collection, getDocs, getDoc, deleteDoc, Modal } from "firebase/firestore";
+import { Button, Stack, Typography, Modal, TextField, Box } from '@mui/material';
+import { query, collection, getDocs, getDoc, deleteDoc } from "firebase/firestore";
 
 export default function None(){
     const [inventory, setInventory] = useState([])
@@ -67,26 +66,53 @@ export default function None(){
     return (
         <Box width="100vw" height="100vh" display="flex" justifyContent="center" alignItems="center" gap={2}>
 
-            <Modal open={open} onClose={handleClose}>
+            <Modal open={open} onClose={handleClosed}>
                 <Box 
                 position="absolute"
                 top="50%"
                 left = "50%"
-                transform="translate(-50%, -50%)"
+                sx={{transform: "translate(-50%, -50%)",}}
                 width={500}
                 bgcolor="white"
-                border="2px solid #000000"
+                border="2px solid #000"
                 boxShadow={24}
                 p={4}
                 display={"flex"}
                 flexDirection="column"
                 gap={3}
                 >
+                    <Typography variant="h6">Add Item</Typography>
+                    <Stack width="100%" direction="row" spacing={2}>
+                        <TextField 
+                        variant="outlined"
+                        fullWidth
+                        value={itemName}
+                        onChange={(e) => {
+                            setItemName(e.target.value)
+                        }}
+                        />
+
+                        <Button
+                        variant="outlined"
+                        onClick={() => {
+                            addItem(itemName)
+                            setItemName("")
+                            handleClosed()
+                        }}
+                        >Add</Button>
+                    </Stack>
 
                 </Box>
 
             </Modal>
-            <Typography variant="h1">Inventory management</Typography>
+            <Button variant="contained" onClick={() => {
+                handleOpen()
+            }}>
+                Add new item
+            </Button>
+            
+        {/* <Typography variant="h1">Inventory management</Typography> */}
+
             
         </Box>
     )
