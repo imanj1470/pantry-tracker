@@ -56,6 +56,25 @@ export default function None() {
         await updateInventory()
     }
 
+    const editRecord = async (item, newName, newValue) => { /* used to be the add item function change it. add < 0 validation */
+        item = item.charAt(0).toUpperCase() + item.slice(1)
+        const docRef = doc(collection(firestore, "inventory"), item)
+        const docSnap = await getDoc(docRef)
+
+        if (value <= 0){
+                console.log("item removed")
+                alert(item," removed")
+                removeItem(item)
+        } else {
+            
+            if (docSnap.exists()) {
+                const { quantity } = docSnap.data()
+                await setDoc(docRef, { quantity: value })
+            }
+            await updateInventory()
+            }
+    }
+
     useEffect(() => {
         updateInventory()
     }, [])
@@ -110,6 +129,7 @@ export default function None() {
             }}>
                 Add new item
             </Button>
+
             <Box border="1px solid #333">
                 <Box
                     width="800px"
@@ -142,6 +162,10 @@ export default function None() {
                                     removeItem(name)
                                 }}>Remove</Button>
 
+                                <Button variant="contained" onClick={() => {
+                                    editRecord(name, ) /* put here parameters */
+                                }}>Edit</Button>
+
                             </Box>
                         ))}
                 </Stack>
@@ -160,4 +184,9 @@ export default function None() {
     then include ai to scan items
     do bonus tasks
 
+
+
+    curenrlty implelemnent a new handle for openeing a similar menu to old one
+    make it so you can update a record. set quantity for original. 
+    maybe make it same handle as the op but if a new name is in it, then it adds to db as new record. 
 */
