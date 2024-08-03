@@ -68,6 +68,22 @@ export default function None(){
         <Box width="100vw" height="100vh" display="flex" justifyContent="center" alignItems="center" gap={2}>
 
             <Modal open={open} onClose={handleClose}>
+                <Box 
+                position="absolute"
+                top="50%"
+                left = "50%"
+                transform="translate(-50%, -50%)"
+                width={500}
+                bgcolor="white"
+                border="2px solid #000000"
+                boxShadow={24}
+                p={4}
+                display={"flex"}
+                flexDirection="column"
+                gap={3}
+                >
+
+                </Box>
 
             </Modal>
             <Typography variant="h1">Inventory management</Typography>
