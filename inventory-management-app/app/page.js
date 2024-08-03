@@ -24,10 +24,10 @@ export default function None() {
             })
         })
         setInventory(inventoryList)
-
     }
 
     const removeItem = async (item) => {
+        item = item.charAt(0).toUpperCase() + item.slice(1)
         const docRef = doc(collection(firestore, "inventory"), item)
         const docSnap = await getDoc(docRef)
 
@@ -44,6 +44,7 @@ export default function None() {
     }
 
     const addItem = async (item) => {
+        item = item.charAt(0).toUpperCase() + item.slice(1)
         const docRef = doc(collection(firestore, "inventory"), item)
         const docSnap = await getDoc(docRef)
         if (docSnap.exists()) {
