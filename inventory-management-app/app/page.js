@@ -15,6 +15,7 @@ export default function None() {
     const [itemQuantity, setItemQuantity] = useState(1)
     const [isEditing, setIsEditing] = useState(false);
     const [originalItemName, setOriginalItemName] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
 
     const updateInventory = async () => {
         const snapshot = query(collection(firestore, "inventory"))
@@ -28,9 +29,12 @@ export default function None() {
         })
         setInventory(inventoryList)
     }
+    const filteredInventory = inventory.filter(item =>
+        item.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     const removeItem = async (item, reduction) => {
-        filterNumber(reduction)
+        validateNumber(reduction)
         item = item.charAt(0).toUpperCase() + item.slice(1)
         const docRef = doc(collection(firestore, "inventory"), item)
         const docSnap = await getDoc(docRef)
@@ -46,22 +50,22 @@ export default function None() {
         await updateInventory()
     }
 
-    function filterNumber(varName){
+    function validateNumber(varName) {
         varName = parseInt(varName, 10)
-        if (isNaN(varName)) {varName = 0;}
+        if (isNaN(varName)) { varName = 0; }
     }
 
     const addItem = async (name, quantity) => {
         name = name.charAt(0).toUpperCase() + name.slice(1)
         const docRef = doc(collection(firestore, "inventory"), name)
         const docSnap = await getDoc(docRef)
-        filterNumber(quantity)
-       /*  quantity = parseInt(quantity, 10)
-        if (isNaN(quantity)) {quantity = 0;} */
+        validateNumber(quantity)
+        /*  quantity = parseInt(quantity, 10)
+         if (isNaN(quantity)) {quantity = 0;} */
 
         if (docSnap.exists()) {
             const oldQuantity = docSnap.data().quantity
-            filterNumber(oldQuantity)
+            validateNumber(oldQuantity)
             await setDoc(docRef, { quantity: oldQuantity + quantity })
         } else {
             await setDoc(docRef, { quantity: quantity })
@@ -98,6 +102,7 @@ export default function None() {
         setItemName("");
         setItemQuantity(1);
         setOriginalItemName("");
+        setSearchQuery("")
     }
 
     return (
@@ -125,7 +130,7 @@ export default function None() {
                             fullWidth
                             label="Name"
                             id="outlined-basic"
-                            value={itemName} 
+                            value={itemName}
                             onChange={(e) => {
                                 setItemName(e.target.value)
                             }}
@@ -133,22 +138,22 @@ export default function None() {
                         {/* add a quantity editor */}
 
                         <TextField id="outlined-number" label="Quantity" variant="outlined"
-                        type="number" InputLabelProps={{shrink: true,}} 
-                        InputProps={{ inputProps: { min: "1", step:"1"}}}
+                            type="number" InputLabelProps={{ shrink: true, }}
+                            InputProps={{ inputProps: { min: "1", step: "1" } }}
                         /* defaultValue={1} */ sx={{ width: '30%' }}
-                        value={itemQuantity}
-                        onChange={(e) => {
-                            setItemQuantity(parseInt(e.target.value, 10) || 0)
-                        }}
-                        
+                            value={itemQuantity}
+                            onChange={(e) => {
+                                setItemQuantity(parseInt(e.target.value, 10) || 0)
+                            }}
+
                         />
 
                         <Button
                             variant="outlined"
                             onClick={() => {
-                                if (isEditing){
+                                if (isEditing) {
                                     editItem(originalItemName, itemName, itemQuantity)
-                                } else{
+                                } else {
                                     addItem(itemName, itemQuantity)
                                 }
                                 handleClosed()  //check that originalitemnameis being set
@@ -170,26 +175,39 @@ export default function None() {
                     width="800px"
                     height="100px"
                     bgcolor="#ADD8E6"
-                    alignItems="center"
-                    justifyContent="center"
                     display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    padding={2}
                 >
-                    <Typography variant="h2"
-                        color="#333">Inventory Items
+                    <Typography variant="h2" sx={{ textAlign: 'left' }} color="#333">
+                        Inventory Items
                     </Typography>
+                    <TextField
+                        id="standard-basic"
+                        label="Search"
+                        variant="standard"
+                        sx={{ flexShrink: 0, width: "30%"}}
+                        value={searchQuery}
+                        overflow="auto"
+                        onChange={(e) => {
+                            setSearchQuery(e.target.value)
+                            //call search filtserz function
+                        }} 
+                    />
                 </Box>
 
                 <Stack width="800px" height="300px" spacing={2} overflow="auto">
                     {
-                        inventory.map(({ name, quantity }) => (
+                        filteredInventory.map(({ name, quantity }) => (
                             <Box key={name} width="100%"
-                                minHeight="150px"  display="flex"
+                                minHeight="150px" display="flex"
                                 alignItems="center" justifyContent="space-between"
                                 backgroundColor="#f0f0f0" padding={5}>
                                 <Typography variant="h3" color="#333" maxWidth="50%"
                                     textAlign="center" sx={{
                                         overflow: "hidden", textOverflow: "ellipsis",
-                                        wordBreak:"break-word", whiteSpace:"nowrap"
+                                        wordBreak: "break-word", whiteSpace: "nowrap"
                                     }}>
                                     {name.charAt(0).toUpperCase() + name.slice(1)}
                                 </Typography>
