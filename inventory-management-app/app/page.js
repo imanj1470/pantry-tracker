@@ -5,8 +5,9 @@ import Image from "next/image"
 import { useState, useEffect } from "react"
 import { firestore } from "@/firebase"
 import { query, collection, doc, getDocs, getDoc, deleteDoc, setDoc, writeBatch } from "firebase/firestore";
-import { Button, Stack, Typography, Modal, TextField, Box } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import { Button, Stack, Typography, Modal, TextField, Box } from "@mui/material";
+import { styled } from "@mui/material/styles";
+
 
 
 export default function None() {
@@ -21,14 +22,14 @@ export default function None() {
     const [totalQuantity, setTotalQuantity] = useState(0);
 
     const GradientBox = styled(Box)(({ theme }) => ({
-        background: 'linear-gradient(to right, #A6C3C9, #A6C3C9)',
-        width: '100vw',
-        height: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
+        background: "linear-gradient(to right, #A6C3C9, #A6C3C9)",
+        width: "100vw",
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
         gap: theme.spacing(2),
-        flexDirection: 'column',
+        flexDirection: "column",
     }));
 
 
@@ -57,14 +58,14 @@ export default function None() {
 
     const removeAllItems = async () => {
         const batch = writeBatch(firestore); // create a batch instance
-    const snapshot = await getDocs(query(collection(firestore, "inventory")));
+        const snapshot = await getDocs(query(collection(firestore, "inventory")));
 
-    snapshot.forEach((doc) => {
-        batch.delete(doc.ref); // add each delete operation to the batch
-    });
+        snapshot.forEach((doc) => {
+            batch.delete(doc.ref); // add each delete operation to the batch
+        });
 
-    await batch.commit(); // commit the batch
-    await updateInventory();
+        await batch.commit(); // commit the batch
+        await updateInventory();
     };
 
 
@@ -106,7 +107,7 @@ export default function None() {
         item.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const countProducts = async() =>{
+    const countProducts = async () => {
         const snapshot = await getDocs(collection(firestore, "inventory"));
         return snapshot.size;
     }
@@ -126,7 +127,8 @@ export default function None() {
             if (quantity === 1) {
                 await deleteDoc(docRef)
             } else {
-                await setDoc(docRef, { quantity: quantity - reduction })
+                if (quantity < 1) { await deleteDoc(docRef) }
+                else { await setDoc(docRef, { quantity: quantity - reduction }) }
             }
         }
         await updateInventory()
@@ -178,7 +180,7 @@ export default function None() {
     useEffect(() => {
         updateInventory()
         handleCountProducts()
-    }, [])
+    }, [handleCountProducts, updateInventory])
 
     const handleOpen = () => setOpen(true)
     const handleClosed = () => {
@@ -191,26 +193,18 @@ export default function None() {
     }
 
     return (
-        <GradientBox>
-
-        <Box
-            position="relative"
-            marginTop="0.65%"
-            width="800px"
-            borderRadius={2}
-            height="100px"
-            bgcolor="#6798A2"
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-            padding={2}>
-                <Typography variant="h3">Stock management system</Typography>
-                </Box>
-
 
 
         <Box width="100vw" height="100vh" display="flex" justifyContent="center" alignItems="center" gap={2} flexDirection="column">
-
+            <Box
+                position="relative" marginTop="0.65%" width="800px" borderRadius={2}
+                height="100px"
+                bgcolor="#6798A2"
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                padding={2}>
+                <Typography variant="h3"> Stock management system </Typography></Box>.
             <Modal open={open} onClose={handleClosed}>
                 <Box
                     position="absolute"
@@ -238,12 +232,11 @@ export default function None() {
                                 setItemName(e.target.value)
                             }}
                         />
-                        {/* add a quantity editor */}
 
                         <TextField id="outlined-number" label="Quantity" variant="outlined"
                             type="number" InputLabelProps={{ shrink: true, }}
                             InputProps={{ inputProps: { min: "1", step: "1" } }}
-                        /* defaultValue={1} */ sx={{ width: '30%' }}
+                            sx={{ width: "30%" }}
                             value={itemQuantity}
                             onChange={(e) => {
                                 setItemQuantity(parseInt(e.target.value, 10) || 0)
@@ -268,43 +261,43 @@ export default function None() {
 
             </Modal>
 
-            
+
             <Box display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            padding={3}
-            width="800px"
-            height="100px"
-            
-            border="5px solid #333"
-            > 
-            <Button variant="contained" 
-            sx={{ textAlign: 'left' }}
-            onClick={() => {
-                handleOpen()
-            }}>
-                Add Item's
-            </Button>
+                justifyContent="space-between"
+                alignItems="center"
+                padding={3}
+                width="800px"
+                height="100px"
 
-            <Button variant="contained" 
-            sx={{ textAlign: 'right' }}
-            onClick={removeAllItems}>
-                Clear database
-            </Button>
+                border="5px solid #333"
+            >
+                <Button variant="contained"
+                    sx={{ textAlign: "left" }}
+                    onClick={() => {
+                        handleOpen()
+                    }}>
+                    Add Item's
+                </Button>
 
-            <Button variant="contained" 
-            sx={{ textAlign: 'right' }}
-            onClick={() => {
-                resetDB()
-            }}>
-                Reset database to default
-            </Button>
+                <Button variant="contained"
+                    sx={{ textAlign: "right" }}
+                    onClick={removeAllItems}>
+                    Clear database
+                </Button>
+
+                <Button variant="contained"
+                    sx={{ textAlign: "right" }}
+                    onClick={() => {
+                        resetDB()
+                    }}>
+                    Reset database to default
+                </Button>
             </Box>
 
             <Box border="5px solid #333" borderRadius="5px">
                 <Box
                     width="800px"
-                    
+
                     height="100px"
                     bgcolor="#C9E4CA"
                     display="flex"
@@ -312,24 +305,24 @@ export default function None() {
                     justifyContent="space-between"
                     padding={2}
                 >
-                    <Typography variant="h3" sx={{ textAlign: 'left' }} color="#333">
-                        Inventory Items: 
+                    <Typography variant="h3" sx={{ textAlign: "left" }} color="#333">
+                        Inventory Items:
                     </Typography>
                     <Box>
-                    <Typography variant="h5">{productCount} Products</Typography>
-                    <Typography variant="h5">{totalQuantity} Items</Typography>
+                        <Typography variant="h5">{productCount} Products</Typography>
+                        <Typography variant="h5">{totalQuantity} Items</Typography>
                     </Box>
                     <TextField
                         id="standard-basic"
                         label="Search"
                         variant="standard"
-                        sx={{ flexShrink: 0, width: "30%"}}
+                        sx={{ flexShrink: 0, width: "30%" }}
                         value={searchQuery}
                         overflow="auto"
                         onChange={(e) => {
                             setSearchQuery(e.target.value)
                             //call search filtserz function
-                        }} 
+                        }}
                     />
                 </Box>
 
@@ -367,7 +360,8 @@ export default function None() {
                 </Stack>
             </Box>
         </Box>
-        </GradientBox>
+
+
     )
 }
 
