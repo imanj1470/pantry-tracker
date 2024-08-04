@@ -12,7 +12,7 @@ export default function None() {
     const [inventory, setInventory] = useState([])
     const [open, setOpen] = useState(false)
     const [itemName, setItemName] = useState([""])
-    const [itemQuantity, setItemQuantity] = useState(0)
+    const [itemQuantity, setItemQuantity] = useState(1)
 
     const updateInventory = async () => {
         const snapshot = query(collection(firestore, "inventory"))
@@ -52,7 +52,7 @@ export default function None() {
             const { quantity } = docSnap.data()
             await setDoc(docRef, { quantity: quantity + itemQuantity })
         } else {
-            await setDoc(docRef, { quantity: 1 })
+            await setDoc(docRef, { quantity: itemQuantity })
         }
         await updateInventory()
     }
@@ -117,11 +117,11 @@ export default function None() {
 
                         <TextField id="outlined-number" label="Quantity" variant="outlined"
                         type="number" InputLabelProps={{shrink: true,}} 
-                        InputProps={{ inputProps: { min: "0", step:"1"}}}
+                        InputProps={{ inputProps: { min: "1", step:"1"}}}
                         defaultValue={1} sx={{ width: '30%' }}
                         value={itemQuantity}
                         onChange={(e) => {
-                            setItemQuantity(e.target.value)
+                            setItemQuantity(parseInt(e.target.value), 10)
                         }}
                         
                         />
@@ -134,7 +134,7 @@ export default function None() {
                             onClick={() => {
                                 addItem(itemName.charAt(0).toUpperCase() + itemName.slice(1))
                                 setItemName("")
-                                setItemQuantity()
+                                setItemQuantity(1)
                                 handleClosed()
                             }}
                         >Add</Button>
@@ -167,11 +167,14 @@ export default function None() {
                     {
                         inventory.map(({ name, quantity }) => (
                             <Box key={name} width="100%"
-                                minHeight="150px" display="flex"
+                                minHeight="150px"  display="flex"
                                 alignItems="center" justifyContent="space-between"
                                 backgroundColor="#f0f0f0" padding={5}>
-                                <Typography variant="h3" color="#333"
-                                    textAlign="center">
+                                <Typography variant="h3" color="#333" maxWidth="50%"
+                                    textAlign="center" sx={{
+                                        overflow: "hidden", textOverflow: "ellipsis",
+                                        wordBreak:"break-word", whiteSpace:"nowrap"
+                                    }}>
                                     {name.charAt(0).toUpperCase() + name.slice(1)}
                                 </Typography>
                                 <Typography variant="h3" color="#333"
