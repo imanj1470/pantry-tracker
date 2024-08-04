@@ -11,7 +11,7 @@ import { Button, Stack, Typography, Modal, TextField, Box } from '@mui/material'
 export default function None() {
     const [inventory, setInventory] = useState([])
     const [open, setOpen] = useState(false)
-    const [itemName, setItemName] = useState([""])
+    const [itemName, setItemName] = useState("")
     const [itemQuantity, setItemQuantity] = useState(1)
 
     const updateInventory = async () => {
@@ -57,23 +57,18 @@ export default function None() {
         await updateInventory()
     }
 
-    const editRecord = async (item, newName, newValue) => { /* used to be the add item function change it. add < 0 validation */
-        item = item.charAt(0).toUpperCase() + item.slice(1)
-        const docRef = doc(collection(firestore, "inventory"), item)
-        const docSnap = await getDoc(docRef)
-
-        if (value <= 0){
-                console.log("item removed")
-                alert(item," removed")
-                removeItem(item)
+    const editItem = async () => {
+        const oldDocRef = doc(collection(firestore, "inventory"), item)
+        if ((await getDoc(itemName)).exists()) { //checks if exists
+            const newDocRef = doc(collection(firestore, "inventory"), itemName);
+            await setDoc(newDocRef, { quantity: itemQuantity })
+            await deleteDoc(oldDocRef);
         } else {
-            
-            if (docSnap.exists()) {
-                const { quantity } = docSnap.data()
-                await setDoc(docRef, { quantity: value })
-            }
-            await updateInventory()
-            }
+            console.log("didnt edit")
+            addItem(itemName, itemQuantity)
+
+        }
+        await updateInventory()
     }
 
     useEffect(() => {
@@ -109,6 +104,7 @@ export default function None() {
                             label="Name"
                             id="outlined-basic"
                             value={itemName} 
+                            defaultValue={itemName}
                             onChange={(e) => {
                                 setItemName(e.target.value)
                             }}
@@ -185,7 +181,8 @@ export default function None() {
                                 }}>Remove</Button>
 
                                 <Button variant="contained" onClick={() => {
-                                    editRecord(name, ) /* put here parameters */
+                                    editItem()
+                                    handleOpen()
                                 }}>Edit</Button>
 
                             </Box>
