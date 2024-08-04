@@ -4,8 +4,9 @@
 import Image from "next/image"
 import { useState, useEffect } from "react"
 import { firestore } from "@/firebase"
-import { query, collection, doc, getDocs, getDoc, deleteDoc, setDoc } from "firebase/firestore";
+import { query, collection, doc, getDocs, getDoc, deleteDoc, setDoc, writeBatch } from "firebase/firestore";
 import { Button, Stack, Typography, Modal, TextField, Box } from '@mui/material';
+import { styled } from '@mui/material/styles';
 
 
 export default function None() {
@@ -16,22 +17,103 @@ export default function None() {
     const [isEditing, setIsEditing] = useState(false);
     const [originalItemName, setOriginalItemName] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
+    const [productCount, setProductCount] = useState(0);
+    const [totalQuantity, setTotalQuantity] = useState(0);
+
+    const GradientBox = styled(Box)(({ theme }) => ({
+        background: 'linear-gradient(to right, #A6C3C9, #A6C3C9)',
+        width: '100vw',
+        height: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: theme.spacing(2),
+        flexDirection: 'column',
+    }));
+
+
+    const defaultItems = [
+        { name: "Apples", quantity: 34 },
+        { name: "Bananas", quantity: 22 },
+        { name: "Oranges", quantity: 17 },
+        { name: "Strawberries", quantity: 9 },
+        { name: "Grapes", quantity: 28 },
+        { name: "Blueberries", quantity: 43 },
+        { name: "Watermelons", quantity: 15 },
+        { name: "Pineapples", quantity: 38 },
+        { name: "Mangoes", quantity: 11 },
+        { name: "Peaches", quantity: 29 },
+        { name: "Plums", quantity: 20 },
+        { name: "Pears", quantity: 45 },
+        { name: "Cherries", quantity: 5 },
+        { name: "Kiwis", quantity: 36 },
+        { name: "Papayas", quantity: 8 },
+        { name: "Lemons", quantity: 27 },
+        { name: "Limes", quantity: 18 },
+        { name: "Raspberries", quantity: 41 },
+        { name: "Blackberries", quantity: 13 },
+        { name: "Cantaloupes", quantity: 32 },
+    ];
+
+    const removeAllItems = async () => {
+        const batch = writeBatch(firestore); // create a batch instance
+    const snapshot = await getDocs(query(collection(firestore, "inventory")));
+
+    snapshot.forEach((doc) => {
+        batch.delete(doc.ref); // add each delete operation to the batch
+    });
+
+    await batch.commit(); // commit the batch
+    await updateInventory();
+    };
+
+
+    const addInitialItems = async () => {
+
+        for (let item of defaultItems) {
+            const docRef = doc(collection(firestore, "inventory"), item.name);
+            await setDoc(docRef, { quantity: item.quantity });
+        }
+        await updateInventory();
+    };
+
+    const resetDB = async () => {
+        removeAllItems()
+        addInitialItems()
+
+    }
+
+
 
     const updateInventory = async () => {
         const snapshot = query(collection(firestore, "inventory"))
         const docs = await getDocs(snapshot)
         const inventoryList = []
+        let totalQty = 0
         docs.forEach((doc) => {
+            const data = doc.data();
             inventoryList.push({
                 name: doc.id,
-                ...doc.data(),
-            })
-        })
+                ...data,
+            });
+            totalQty += data.quantity;
+        });
         setInventory(inventoryList)
+        setTotalQuantity(totalQty);
+        handleCountProducts()
     }
     const filteredInventory = inventory.filter(item =>
         item.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    const countProducts = async() =>{
+        const snapshot = await getDocs(collection(firestore, "inventory"));
+        return snapshot.size;
+    }
+    const handleCountProducts = async () => {
+        const count = await countProducts();
+        setProductCount(count);
+    };
 
     const removeItem = async (item, reduction) => {
         validateNumber(reduction)
@@ -73,6 +155,8 @@ export default function None() {
         await updateInventory()
     }
 
+
+
     const editItem = async (originalName, newName, newQuantity) => {
         originalName = originalName.charAt(0).toUpperCase() + originalName.slice(1);
         newName = newName.charAt(0).toUpperCase() + newName.slice(1)
@@ -93,6 +177,7 @@ export default function None() {
 
     useEffect(() => {
         updateInventory()
+        handleCountProducts()
     }, [])
 
     const handleOpen = () => setOpen(true)
@@ -106,6 +191,24 @@ export default function None() {
     }
 
     return (
+        <GradientBox>
+
+        <Box
+            position="relative"
+            marginTop="0.65%"
+            width="800px"
+            borderRadius={2}
+            height="100px"
+            bgcolor="#6798A2"
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            padding={2}>
+                <Typography variant="h3">Stock management system</Typography>
+                </Box>
+
+
+
         <Box width="100vw" height="100vh" display="flex" justifyContent="center" alignItems="center" gap={2} flexDirection="column">
 
             <Modal open={open} onClose={handleClosed}>
@@ -164,25 +267,58 @@ export default function None() {
                 </Box>
 
             </Modal>
-            <Button variant="contained" onClick={() => {
+
+            
+            <Box display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            padding={3}
+            width="800px"
+            height="100px"
+            
+            border="5px solid #333"
+            > 
+            <Button variant="contained" 
+            sx={{ textAlign: 'left' }}
+            onClick={() => {
                 handleOpen()
             }}>
                 Add Item's
             </Button>
 
-            <Box border="1px solid #333">
+            <Button variant="contained" 
+            sx={{ textAlign: 'right' }}
+            onClick={removeAllItems}>
+                Clear database
+            </Button>
+
+            <Button variant="contained" 
+            sx={{ textAlign: 'right' }}
+            onClick={() => {
+                resetDB()
+            }}>
+                Reset database to default
+            </Button>
+            </Box>
+
+            <Box border="5px solid #333" borderRadius="5px">
                 <Box
                     width="800px"
+                    
                     height="100px"
-                    bgcolor="#ADD8E6"
+                    bgcolor="#C9E4CA"
                     display="flex"
                     alignItems="center"
                     justifyContent="space-between"
                     padding={2}
                 >
-                    <Typography variant="h2" sx={{ textAlign: 'left' }} color="#333">
-                        Inventory Items
+                    <Typography variant="h3" sx={{ textAlign: 'left' }} color="#333">
+                        Inventory Items: 
                     </Typography>
+                    <Box>
+                    <Typography variant="h5">{productCount} Products</Typography>
+                    <Typography variant="h5">{totalQuantity} Items</Typography>
+                    </Box>
                     <TextField
                         id="standard-basic"
                         label="Search"
@@ -231,6 +367,7 @@ export default function None() {
                 </Stack>
             </Box>
         </Box>
+        </GradientBox>
     )
 }
 
