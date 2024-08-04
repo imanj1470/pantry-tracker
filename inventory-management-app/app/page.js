@@ -12,6 +12,7 @@ export default function None() {
     const [inventory, setInventory] = useState([])
     const [open, setOpen] = useState(false)
     const [itemName, setItemName] = useState([""])
+    const [itemQuantity, setItemQuantity] = useState(0)
 
     const updateInventory = async () => {
         const snapshot = query(collection(firestore, "inventory"))
@@ -49,7 +50,7 @@ export default function None() {
         const docSnap = await getDoc(docRef)
         if (docSnap.exists()) {
             const { quantity } = docSnap.data()
-            await setDoc(docRef, { quantity: quantity + 1 })
+            await setDoc(docRef, { quantity: quantity + itemQuantity })
         } else {
             await setDoc(docRef, { quantity: 1 })
         }
@@ -100,22 +101,40 @@ export default function None() {
                     flexDirection="column"
                     gap={3}
                 >
-                    <Typography variant="h6">Add Item</Typography>
+                    <Typography variant="h6">Add item's</Typography>
                     <Stack width="100%" direction="row" spacing={2}>
                         <TextField
                             variant="outlined"
                             fullWidth
+                            label="Name"
+                            id="outlined-basic"
                             value={itemName} 
                             onChange={(e) => {
                                 setItemName(e.target.value)
                             }}
                         />
+                        {/* add a quantity editor */}
+
+                        <TextField id="outlined-number" label="Quantity" variant="outlined"
+                        type="number" InputLabelProps={{shrink: true,}} 
+                        InputProps={{ inputProps: { min: "0", step:"1"}}}
+                        defaultValue={1} sx={{ width: '30%' }}
+                        value={itemQuantity}
+                        onChange={(e) => {
+                            setItemQuantity(e.target.value)
+                        }}
+                        
+                        />
+
+
+          {/* id="outlined-error" */}
 
                         <Button
                             variant="outlined"
                             onClick={() => {
                                 addItem(itemName.charAt(0).toUpperCase() + itemName.slice(1))
                                 setItemName("")
+                                setItemQuantity()
                                 handleClosed()
                             }}
                         >Add</Button>
@@ -127,7 +146,7 @@ export default function None() {
             <Button variant="contained" onClick={() => {
                 handleOpen()
             }}>
-                Add new item
+                Add Item's
             </Button>
 
             <Box border="1px solid #333">
