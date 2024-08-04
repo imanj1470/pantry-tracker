@@ -13,6 +13,8 @@ export default function None() {
     const [open, setOpen] = useState(false)
     const [itemName, setItemName] = useState("")
     const [itemQuantity, setItemQuantity] = useState(1)
+    const [isEditing, setIsEditing] = useState(false);
+    const [originalItemName, setOriginalItemName] = useState("");
 
     const updateInventory = async () => {
         const snapshot = query(collection(firestore, "inventory"))
@@ -27,46 +29,60 @@ export default function None() {
         setInventory(inventoryList)
     }
 
-    const removeItem = async (item) => {
+    const removeItem = async (item, reduction) => {
+        filterNumber(reduction)
         item = item.charAt(0).toUpperCase() + item.slice(1)
         const docRef = doc(collection(firestore, "inventory"), item)
         const docSnap = await getDoc(docRef)
 
         if (docSnap.exists()) {
             const { quantity } = docSnap.data()
-
             if (quantity === 1) {
                 await deleteDoc(docRef)
             } else {
-                await setDoc(docRef, { quantity: quantity - 1 })
+                await setDoc(docRef, { quantity: quantity - reduction })
             }
         }
         await updateInventory()
     }
 
-    const addItem = async (item) => {
-        item = item.charAt(0).toUpperCase() + item.slice(1)
-        const docRef = doc(collection(firestore, "inventory"), item)
+    function filterNumber(varName){
+        varName = parseInt(varName, 10)
+        if (isNaN(varName)) {varName = 0;}
+    }
+
+    const addItem = async (name, quantity) => {
+        name = name.charAt(0).toUpperCase() + name.slice(1)
+        const docRef = doc(collection(firestore, "inventory"), name)
         const docSnap = await getDoc(docRef)
+        filterNumber(quantity)
+       /*  quantity = parseInt(quantity, 10)
+        if (isNaN(quantity)) {quantity = 0;} */
+
         if (docSnap.exists()) {
-            const { quantity } = docSnap.data()
-            await setDoc(docRef, { quantity: quantity + itemQuantity })
+            const oldQuantity = docSnap.data().quantity
+            filterNumber(oldQuantity)
+            await setDoc(docRef, { quantity: oldQuantity + quantity })
         } else {
-            await setDoc(docRef, { quantity: itemQuantity })
+            await setDoc(docRef, { quantity: quantity })
         }
         await updateInventory()
     }
 
-    const editItem = async () => {
-        const oldDocRef = doc(collection(firestore, "inventory"), item)
-        if ((await getDoc(itemName)).exists()) { //checks if exists
-            const newDocRef = doc(collection(firestore, "inventory"), itemName);
-            await setDoc(newDocRef, { quantity: itemQuantity })
+    const editItem = async (originalName, newName, newQuantity) => {
+        originalName = originalName.charAt(0).toUpperCase() + originalName.slice(1);
+        newName = newName.charAt(0).toUpperCase() + newName.slice(1)
+        const oldDocRef = doc(collection(firestore, "inventory"), originalName)
+        const oldDocSnap = await getDoc(oldDocRef)
+        newQuantity = parseInt(newQuantity, 10);
+        console.log("heheh")
+        if (oldDocSnap.exists()) { //checks if exists
             await deleteDoc(oldDocRef);
+            const newDocRef = doc(collection(firestore, "inventory"), newName);
+            await setDoc(newDocRef, { quantity: newQuantity })
         } else {
-            console.log("didnt edit")
-            addItem(itemName, itemQuantity)
-
+            const newDocRef = doc(collection(firestore, "inventory"), newName);
+            await setDoc(newDocRef, { quantity: newQuantity })
         }
         await updateInventory()
     }
@@ -76,7 +92,13 @@ export default function None() {
     }, [])
 
     const handleOpen = () => setOpen(true)
-    const handleClosed = () => setOpen(false)
+    const handleClosed = () => {
+        setOpen(false)
+        setIsEditing(false)
+        setItemName("");
+        setItemQuantity(1);
+        setOriginalItemName("");
+    }
 
     return (
         <Box width="100vw" height="100vh" display="flex" justifyContent="center" alignItems="center" gap={2} flexDirection="column">
@@ -104,7 +126,6 @@ export default function None() {
                             label="Name"
                             id="outlined-basic"
                             value={itemName} 
-                            defaultValue={itemName}
                             onChange={(e) => {
                                 setItemName(e.target.value)
                             }}
@@ -114,26 +135,25 @@ export default function None() {
                         <TextField id="outlined-number" label="Quantity" variant="outlined"
                         type="number" InputLabelProps={{shrink: true,}} 
                         InputProps={{ inputProps: { min: "1", step:"1"}}}
-                        defaultValue={1} sx={{ width: '30%' }}
+                        /* defaultValue={1} */ sx={{ width: '30%' }}
                         value={itemQuantity}
                         onChange={(e) => {
-                            setItemQuantity(parseInt(e.target.value), 10)
+                            setItemQuantity(parseInt(e.target.value, 10) || 0)
                         }}
                         
                         />
 
-
-          {/* id="outlined-error" */}
-
                         <Button
                             variant="outlined"
                             onClick={() => {
-                                addItem(itemName.charAt(0).toUpperCase() + itemName.slice(1))
-                                setItemName("")
-                                setItemQuantity(1)
-                                handleClosed()
+                                if (isEditing){
+                                    editItem(originalItemName, itemName, itemQuantity)
+                                } else{
+                                    addItem(itemName, itemQuantity)
+                                }
+                                handleClosed()  //check that originalitemnameis being set
                             }}
-                        >Add</Button>
+                        >{isEditing ? "Save" : "Add"}</Button>
                     </Stack>
 
                 </Box>
@@ -177,11 +197,14 @@ export default function None() {
                                     textAlign="center">{quantity}</Typography>
 
                                 <Button variant="contained" onClick={() => {
-                                    removeItem(name)
+                                    removeItem(name, 1)
                                 }}>Remove</Button>
 
                                 <Button variant="contained" onClick={() => {
-                                    editItem()
+                                    setItemName(name)
+                                    setItemQuantity(quantity)
+                                    setOriginalItemName(name)
+                                    setIsEditing(true)
                                     handleOpen()
                                 }}>Edit</Button>
 
