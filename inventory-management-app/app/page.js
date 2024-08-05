@@ -180,7 +180,7 @@ export default function None() {
     useEffect(() => {
         updateInventory()
         handleCountProducts()
-    }, [handleCountProducts, updateInventory])
+    }, [])
 
     const handleOpen = () => setOpen(true)
     const handleClosed = () => {
@@ -193,8 +193,6 @@ export default function None() {
     }
 
     return (
-
-
         <Box width="100vw" height="100vh" display="flex" justifyContent="center" alignItems="center" gap={2} flexDirection="column">
             <Box
                 position="relative" marginTop="0.65%" width="800px" borderRadius={2}
@@ -220,7 +218,7 @@ export default function None() {
                     flexDirection="column"
                     gap={3}
                 >
-                    <Typography variant="h6">Add item's</Typography>
+                    <Typography variant="h6">Add itemʼs</Typography>
                     <Stack width="100%" direction="row" spacing={2}>
                         <TextField
                             variant="outlined"
@@ -276,7 +274,7 @@ export default function None() {
                     onClick={() => {
                         handleOpen()
                     }}>
-                    Add Item's
+                    Add Itemʼs
                 </Button>
 
                 <Button variant="contained"
